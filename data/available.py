@@ -1,5 +1,6 @@
 from torchvision import datasets, transforms
 from data.manipulate import UnNormalize
+from data.tinmnist import *
 
 
 # specify available data-sets.
@@ -7,6 +8,7 @@ AVAILABLE_DATASETS = {
     'MNIST': datasets.MNIST,
     'CIFAR100': datasets.CIFAR100,
     'CIFAR10': datasets.CIFAR10,
+    'TINMNIST': TINMNIST,
 }
 
 # specify available transforms.
@@ -32,6 +34,9 @@ AVAILABLE_TRANSFORMS = {
     ],
     'CIFAR10_denorm': UnNormalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2470, 0.2435, 0.2616]),
     'CIFAR100_denorm': UnNormalize(mean=[0.5071, 0.4865, 0.4409], std=[0.2673, 0.2564, 0.2761]),
+    'TINMNIST': [
+        transforms.ToTensor(),
+    ],
     'augment_from_tensor': [
         transforms.ToPILImage(),
         transforms.RandomCrop(32, padding=4, padding_mode='symmetric'),
@@ -50,4 +55,5 @@ DATASET_CONFIGS = {
     'MNIST32': {'size': 32, 'channels': 1, 'classes': 10},
     'CIFAR10': {'size': 32, 'channels': 3, 'classes': 10},
     'CIFAR100': {'size': 32, 'channels': 3, 'classes': 100},
+    'TINMNIST': {'size': 32, 'channels': 3, 'classes': 210},
 }

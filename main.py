@@ -35,6 +35,15 @@ def handle_inputs():
     parser = options.add_cl_options(parser, **kwargs)
     # Parse, process and check chosen options
     args = parser.parse_args()
+
+    #running arguments
+    args.iters = 10
+    args.experiment = "TINMNIST"
+    args.screnario = "task"
+    args.lwf = True
+    #args.ewc = True
+    #args.batch = 256
+
     set_method_options(args)                         # -if a method's "convenience"-option is chosen, select components
     set_default_values(args, also_hyper_params=True) # -set defaults, some are based on chosen scenario / experiment
     check_for_errors(args, **kwargs)                 # -check whether incompatible options are selected
