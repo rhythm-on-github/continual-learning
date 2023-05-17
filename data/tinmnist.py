@@ -2,6 +2,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import warnings
 from PIL import Image
 import numpy as np
+import os
+import pathlib
 
 
 from torchvision.datasets import VisionDataset
@@ -44,21 +46,38 @@ class TINMNIST(VisionDataset):
         #    self.data, self.targets = self._load_legacy_data()
         #    return
 
-        #if download:
-        #    self.download()
-
         #if not self._check_exists():
         #    raise RuntimeError('Dataset not found.' +
         #                       ' You can use download=True to download it')
+        
+        workDir  = pathlib.Path().resolve()
+        dataDir  = os.path.join(workDir.parent.resolve(), 'TINMNIST')
 
-        #self.data, self.targets = self._load_data()
+        #download dataset maybe sometime
+
+        #load self.data and self.targets
+        self.data = []
+        self.targets = []
+        for task_num in range(1, 9+1):
+            path_task = os.path.join(data_path, "Task_" + str(task_num))
+            
+            image_folder = None
+            if (task_number <= 4):
+                image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_tin['train'])
+            else:
+                image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_mnist['train'])
+            
+            dset_size = len(image_folder)
+            dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = opt.batch_size, shuffle=True, num_workers=1)
+
+            #load data within that folder
+            for data, labels in dset_loaders:
+                #TBD: add to self.data and self.targets
 
         
     def __len__(self) -> int:
         return len(self.data)
 
-    data = [[]]
-    targets = [[]]
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
         """
