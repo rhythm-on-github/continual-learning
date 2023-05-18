@@ -55,5 +55,5 @@ DATASET_CONFIGS = {
     'MNIST32': {'size': 32, 'channels': 1, 'classes': 10},
     'CIFAR10': {'size': 32, 'channels': 3, 'classes': 10},
     'CIFAR100': {'size': 32, 'channels': 3, 'classes': 100},
-    'TINMNIST': {'size': 32, 'channels': 3, 'classes': 210},
+    'TINMNIST': {'size': 28, 'channels': 3, 'classes': 210},
 }

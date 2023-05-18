@@ -38,7 +38,7 @@ def handle_inputs():
 
     #running arguments
     args.iters = 10
-    args.experiment = "splitMNIST"
+    args.experiment = "TINMNIST"
     args.screnario = "task"
     args.lwf = True
     #args.ewc = True

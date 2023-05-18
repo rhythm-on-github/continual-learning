@@ -5,9 +5,45 @@ import numpy as np
 import os
 import pathlib
 
-
+from tqdm import tqdm
+import torch
 from torchvision.datasets import VisionDataset
+import torchvision.datasets as datasets
+import torchvision.transforms as transforms
 
+
+#transforms for the tiny-imagenet dataset. Applicable for the tasks 1-4
+data_transforms_tin = {
+	'train': transforms.Compose([
+		transforms.Resize(32),
+		transforms.CenterCrop(28),
+		transforms.ToTensor(),
+		transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+	]),
+	'test': transforms.Compose([
+		transforms.Resize(32),
+		transforms.CenterCrop(28),
+		transforms.ToTensor(),
+		transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+	])
+}
+
+
+#transforms for the mnist dataset. Applicable for the tasks 5-9
+data_transforms_mnist = {
+	'train': transforms.Compose([
+		transforms.Resize(32),
+		transforms.CenterCrop(28),
+		transforms.ToTensor(),
+		transforms.Normalize([0.1307,], [0.3081,])
+	]),
+	'test': transforms.Compose([
+		transforms.Resize(32),
+		transforms.CenterCrop(28),
+		transforms.ToTensor(),
+		transforms.Normalize([0.1307,], [0.3081,])
+	])
+}
 
 class TINMNIST(VisionDataset):
     @property
@@ -51,28 +87,38 @@ class TINMNIST(VisionDataset):
         #                       ' You can use download=True to download it')
         
         workDir  = pathlib.Path().resolve()
-        dataDir  = os.path.join(workDir.parent.resolve(), 'TINMNIST')
+        dataDir  = os.path.join(workDir, 'TINMNIST')
 
         #download dataset maybe sometime
 
         #load self.data and self.targets
-        self.data = []
-        self.targets = []
+        self.data = np.zeros((180000, 3, 28, 28), dtype=float)
+        self.targets = np.zeros(180000, dtype=float)
+        i = 0
         for task_num in range(1, 9+1):
-            path_task = os.path.join(data_path, "Task_" + str(task_num))
+            print("\nLoading task " + str(task_num) + " of 9")
+            path_task = os.path.join(dataDir, "Task_" + str(task_num))
             
             image_folder = None
-            if (task_number <= 4):
-                image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_tin['train'])
+            if (task_num <= 4):
+                image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_tin['train'])
             else:
-                image_folder = datasets.ImageFolder(os.path.join(path_task, 'train'), transform = data_transforms_mnist['train'])
+                image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_mnist['train'])
             
             dset_size = len(image_folder)
-            dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = opt.batch_size, shuffle=True, num_workers=1)
+            dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = 1024, shuffle=False, num_workers=1)
 
             #load data within that folder
-            for data, labels in dset_loaders:
-                #TBD: add to self.data and self.targets
+            for data, labels in tqdm(dset_loaders):
+                pre_i = i
+                i += len(data)
+                self.data[pre_i:i, :, :, :] = data
+                self.targets[pre_i:i] = labels
+
+        print("Resizing data structure")
+        self.data = np.resize(self.data, (i, 3, 28, 28))
+        self.targets = np.resize(self.targets, i)
+        print("TINMNIST loaded")
 
         
     def __len__(self) -> int:

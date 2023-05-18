@@ -126,7 +126,7 @@ def get_context_set(name, scenario, contexts, data_dir="./datasets", only_config
         # prepare permutation to shuffle label-ids (to create different class batches for each random seed)
         classes = config['classes']
         perm_class_list = np.array(list(range(classes))) if exception else np.random.permutation(list(range(classes)))
-        target_transform = transforms.Lambda(lambda y, p=perm_class_list: int(p[y]))
+        target_transform = transforms.Lambda(lambda y, p=perm_class_list: int(p[int(y)]))
         # prepare train and test datasets with all classes
         trainset = get_dataset(data_type, type="train", dir=data_dir, target_transform=target_transform,
                                verbose=verbose, augment=augment, normalize=normalize)
