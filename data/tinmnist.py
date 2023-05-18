@@ -147,6 +147,7 @@ class TINMNIST(VisionDataset):
             tuple: (image, target) where target is index of the target class.
         """
         img, target = self.data[index], int(self.targets[index])
+        img = np.transpose(img, [1, 2, 0])
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
