@@ -125,7 +125,13 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
 
         # Loop over all iterations
         iters_to_use = iters if (generator is None) else max(iters, gen_iters)
-        for batch_index in range(1, iters_to_use+1):
+        is_TINMNIST = False
+        if len(train_datasets[0].dataset.root) >= 8:
+            data_root_end = train_datasets[0].dataset.root[-8:]
+            is_TINMNIST = 'TINMNIST' == data_root_end
+        batches = get_data_loader(training_dataset, batch_size, cuda=cuda, drop_last=False) if is_TINMNIST else range(1, iters_to_use+1)
+        batch_index = 0
+        for batch in batches:
 
             # Update # iters left on current data-loader(s) and, if needed, create new one(s)
             iters_left -= 1
@@ -162,8 +168,12 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
             if baseline=="cummulative" and per_context:
                 x = y = scores = None
             else:
-                asda = next(data_loader)                             #--> sample training data of current context
-                x, y = asda
+                batch_data = None
+                if is_TINMNIST:
+                    batch_data = batch
+                else:
+                    batch_data = next(data_loader)                             #--> sample training data of current context
+                x, y = batch_data
                 y = y-model.classes_per_context*(context-1) if per_context and not per_context_singlehead else y
                 # --> adjust the y-targets to the 'active range'
                 x, y = x.to(device), y.to(device)                    #--> transfer them to correct device
@@ -338,6 +348,8 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
                 for sample_cb in sample_cbs:
                     if sample_cb is not None:
                         sample_cb(generator, batch_index, context=context)
+
+            batch_index += 1
 
 
         ##----------> UPON FINISHING EACH CONTEXT...
