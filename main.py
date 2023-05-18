@@ -43,6 +43,7 @@ def handle_inputs():
     args.lwf = True
     #args.ewc = True
     #args.batch = 256
+    args.cuda = False
 
     set_method_options(args)                         # -if a method's "convenience"-option is chosen, select components
     set_default_values(args, also_hyper_params=True) # -set defaults, some are based on chosen scenario / experiment

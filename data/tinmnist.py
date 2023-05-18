@@ -1,3 +1,5 @@
+# This code is largely inspired by torchvision.datasets.MNIST
+
 from typing import Any, Callable, Dict, List, Optional, Tuple
 import warnings
 from PIL import Image
@@ -46,6 +48,10 @@ data_transforms_mnist = {
 }
 
 class TINMNIST(VisionDataset):
+    data = None
+    targets = None
+    classes = [i for i in range(50)]
+    
     @property
     def train_labels(self):
         warnings.warn("train_labels has been renamed targets")
@@ -65,6 +71,10 @@ class TINMNIST(VisionDataset):
     def test_data(self):
         warnings.warn("test_data has been renamed data")
         return self.data
+
+    @property
+    def class_to_idx(self) -> Dict[str, int]:
+        return {_class: i for i, _class in enumerate(self.classes)}
 
     def __init__(
             self,
@@ -91,34 +101,37 @@ class TINMNIST(VisionDataset):
 
         #download dataset maybe sometime
 
-        #load self.data and self.targets
-        self.data = np.zeros((180000, 3, 28, 28), dtype=float)
-        self.targets = np.zeros(180000, dtype=float)
-        i = 0
-        for task_num in range(1, 9+1):
-            print("\nLoading task " + str(task_num) + " of 9")
-            path_task = os.path.join(dataDir, "Task_" + str(task_num))
+        if self.data is None:
+            #load self.data and self.targets
+            self.data = np.zeros((180000, 3, 28, 28))
+            self.targets = np.zeros(180000)
+            i = 0
+            for task_num in range(1, 1+1):
+                print("\nLoading task " + str(task_num) + " of 9")
+                path_task = os.path.join(dataDir, "Task_" + str(task_num))
             
-            image_folder = None
-            if (task_num <= 4):
-                image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_tin['train'])
-            else:
-                image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_mnist['train'])
+                image_folder = None
+                if (task_num <= 4):
+                    image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_tin['train'])
+                else:
+                    image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_mnist['train'])
             
-            dset_size = len(image_folder)
-            dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = 1024, shuffle=False, num_workers=1)
+                dset_size = len(image_folder)
+                dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = 1024, shuffle=False, num_workers=1)
 
-            #load data within that folder
-            for data, labels in tqdm(dset_loaders):
-                pre_i = i
-                i += len(data)
-                self.data[pre_i:i, :, :, :] = data
-                self.targets[pre_i:i] = labels
+                #load data within that folder
+                for data, labels in tqdm(dset_loaders):
+                    pre_i = i
+                    i += len(data)
+                    self.data[pre_i:i, :, :, :] = data
+                    self.targets[pre_i:i] = labels
 
-        print("Resizing data structure")
-        self.data = np.resize(self.data, (i, 3, 28, 28))
-        self.targets = np.resize(self.targets, i)
-        print("TINMNIST loaded")
+            print("\nResizing data structure")
+            self.data = np.resize(self.data, (i, 3, 28, 28))
+            self.targets = np.resize(self.targets, i)
+            print("TINMNIST loaded")
+        else:
+            print("TINMNIST already loaded, skipping")
 
         
     def __len__(self) -> int:
@@ -137,7 +150,7 @@ class TINMNIST(VisionDataset):
 
         # doing this so that it is consistent with all other datasets
         # to return a PIL Image
-        img = Image.fromarray(img.numpy(), mode='L')
+        img = Image.fromarray(img, mode="RGB")
 
         if self.transform is not None:
             img = self.transform(img)

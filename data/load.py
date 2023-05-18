@@ -77,6 +77,7 @@ def get_context_set(name, scenario, contexts, data_dir="./datasets", only_config
         data_type = 'CIFAR100'
     elif name == "TINMNIST":
         data_type = 'TINMNIST'
+        exception = True
     else:
         raise ValueError('Given undefined experiment: {}'.format(name))
 
