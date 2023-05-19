@@ -41,11 +41,12 @@ def handle_inputs():
     args.experiment = "TINMNIST"
     #args.scenario = "task"
     #args.batch = 256
-    args.cuda = False
+    args.cuda = True
     
     #args.lwf = True
     #args.ewc = True
-    args.icarl = True
+    #args.icarl = True
+    args.joint = True
 
     set_method_options(args)                         # -if a method's "convenience"-option is chosen, select components
     set_default_values(args, also_hyper_params=True) # -set defaults, some are based on chosen scenario / experiment
