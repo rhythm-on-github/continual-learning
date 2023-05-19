@@ -49,7 +49,7 @@ def handle_inputs():
     #args.ewc = True - Out of scope, would take ~5.5 days to run once
     #args.icarl = True
     #dgr?
-    #args.agem = true
+    #args.agem = True
 
     set_method_options(args)                         # -if a method's "convenience"-option is chosen, select components
     set_default_values(args, also_hyper_params=True) # -set defaults, some are based on chosen scenario / experiment
