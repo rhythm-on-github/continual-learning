@@ -105,6 +105,15 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
                     range(model.classes_per_context * i, model.classes_per_context * (i + 1))
                 ) for i in range(context)]
 
+        
+        is_TINMNIST = False
+        if len(train_datasets[0].dataset.root) >= 8:
+            data_root_end = train_datasets[0].dataset.root[-8:]
+            is_TINMNIST = 'TINMNIST' == data_root_end
+        if is_TINMNIST and active_classes is not None:
+            TINMNIST_class_sums = [0, 50, 100, 150, 200, 202, 204, 206, 208, 210]
+            active_classes = [list(range(TINMNIST_class_sums[i], TINMNIST_class_sums[i+1])) for i in range(context)]
+
         # Reset state of optimizer(s) for every context (if requested)
         if (not model.label=="SeparateClassifiers") and model.optim_type=="adam_reset":
             model.optimizer = optim.Adam(model.optim_list, betas=(0.9, 0.999))
@@ -125,10 +134,6 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
 
         # Loop over all iterations
         iters_to_use = iters if (generator is None) else max(iters, gen_iters)
-        is_TINMNIST = False
-        if len(train_datasets[0].dataset.root) >= 8:
-            data_root_end = train_datasets[0].dataset.root[-8:]
-            is_TINMNIST = 'TINMNIST' == data_root_end
         batches = get_data_loader(training_dataset, batch_size, cuda=cuda, drop_last=False) if is_TINMNIST else range(1, iters_to_use+1)
         batch_index = 0
         for batch in batches:
@@ -169,13 +174,17 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
                 x = y = scores = None
             else:
                 batch_data = None
-                if is_TINMNIST:
+                if is_TINMNIST and per_context and not per_context_singlehead:
                     batch_data = batch
+                    x, y = batch_data
+                    TINMNIST_class_sums = [0, 50, 100, 150, 200, 202, 204, 206, 208, 210]
+                    y = torch.add(y, -TINMNIST_class_sums[context-1])
+                    # --> adjust the y-targets to the 'active range'
                 else:
                     batch_data = next(data_loader)                             #--> sample training data of current context
-                x, y = batch_data
-                y = y-model.classes_per_context*(context-1) if per_context and not per_context_singlehead else y
-                # --> adjust the y-targets to the 'active range'
+                    x, y = batch_data
+                    y = y-model.classes_per_context*(context-1) if per_context and not per_context_singlehead else y
+                    # --> adjust the y-targets to the 'active range'
                 x, y = x.to(device), y.to(device)                    #--> transfer them to correct device
                 # If --bce & --bce-distill, calculate scores for past classes of current batch with previous model
                 binary_distillation = hasattr(model, "binaryCE") and model.binaryCE and model.binaryCE_distill
@@ -249,9 +258,13 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
                     context_used = list()
                     for context_id in range(context-1):
                         allowed_domains = list(range(context - 1))
-                        allowed_classes = list(
-                            range(model.classes_per_context*context_id, model.classes_per_context*(context_id+1))
-                        )
+                        allowed_classes = []
+                        if is_TINMNIST:
+                            allowed_classes = range(TINMNIST_class_sums[context_id], TINMNIST_class_sums[context_id+1])
+                        else:
+                            allowed_classes = list(
+                                range(model.classes_per_context*context_id, model.classes_per_context*(context_id+1))
+                            )
                         batch_size_to_use = int(np.ceil(batch_size / (context-1)))
                         x_temp_ = previous_generator.sample(batch_size_to_use, allowed_domains=allowed_domains,
                                                             allowed_classes=allowed_classes, only_x=False)
@@ -259,9 +272,13 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
                         context_used.append(x_temp_[2])
                 else:
                     # -which classes are allowed to be generated? (relevant if conditional generator / decoder-gates)
-                    allowed_classes = None if model.scenario=="domain" else list(
-                        range(model.classes_per_context*(context-1))
-                    )
+                    allowed_classes = []
+                    if is_TINMNIST:
+                        allowed_classes = range(TINMNIST_class_sums[context_id], TINMNIST_class_sums[context_id+1])
+                    else:
+                        allowed_classes = None if model.scenario=="domain" else list(
+                            range(model.classes_per_context*(context-1))
+                        )
                     # -which contexts are allowed to be generated? (only relevant if "Domain-IL" with context-gates)
                     allowed_domains = list(range(context-1))
                     # -generate inputs representative of previous contexts
@@ -388,7 +405,7 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
             model.reduce_memory_sets(samples_per_class)
             # for each new class trained on, construct examplar-set
             new_classes = []
-            if data_root_end == 'TINMNIST':
+            if is_TINMNIST:
                 TINMNIST_class_sums = [0, 50, 100, 150, 200, 202, 204, 206, 208, 210]
                 new_classes = list(range(TINMNIST_class_sums[context-1], TINMNIST_class_sums[context]))
             else:
@@ -491,6 +508,15 @@ def train_fromp(model, train_datasets, iters=2000, batch_size=32,
                 active_classes = [list(
                     range(model.classes_per_context * i, model.classes_per_context * (i + 1))
                 ) for i in range(context)]
+                
+
+        is_TINMNIST = False
+        if len(train_datasets[0].dataset.root) >= 8:
+            data_root_end = train_datasets[0].dataset.root[-8:]
+            is_TINMNIST = 'TINMNIST' == data_root_end
+        if is_TINMNIST and active_classes is not None:
+            TINMNIST_class_sums = [0, 50, 100, 150, 200, 202, 204, 206, 208, 210]
+            active_classes = [list(range(TINMNIST_class_sums[i], TINMNIST_class_sums[i+1])) for i in range(context)]
 
         # Find [label_sets] (i.e., when replaying/revisiting/regularizing previous contexts, which labels to consider)
         label_sets = active_classes if (per_context and not per_context_singlehead) else [active_classes]*context

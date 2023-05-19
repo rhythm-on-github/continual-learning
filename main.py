@@ -41,7 +41,7 @@ def handle_inputs():
     args.experiment = "TINMNIST"
     #args.scenario = "task"
     #args.batch = 256
-    args.cuda = True
+    args.cuda = False
     
     #args.lwf = True
     #args.ewc = True

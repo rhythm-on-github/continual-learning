@@ -129,7 +129,10 @@ class Classifier(ContinualLearner, MemoryBuffer):
         [active_classes]  None or (<list> of) <list> with "active" classes
         [context]         <int> context-ID, with first context labelled as '1' (e.g., for setting context-specific mask)
         '''
-
+        is_TINMNIST = self.classifier.linear.out_features == 210
+        if is_TINMNIST:
+            TINMNIST_class_sums = [0, 50, 100, 150, 200, 202, 204, 206, 208, 210]
+            active_classes = [list(range(TINMNIST_class_sums[i], TINMNIST_class_sums[i+1])) for i in range(context)] if active_classes != None else None
         # Set model to training-mode
         self.train()
         # -however, if some layers are frozen, they should be set to eval() to prevent batch-norm layers from changing
