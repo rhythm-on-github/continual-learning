@@ -88,6 +88,7 @@ class TINMNIST(VisionDataset):
                                     target_transform=target_transform)
         self.train = train  # training set or test set
         mode = 'train' if train else 'test'
+        num_workers = 4 if train else 1
 
         #if self._check_legacy_exist():
         #    self.data, self.targets = self._load_legacy_data()
@@ -123,7 +124,7 @@ class TINMNIST(VisionDataset):
                     label_offset += 2
             
             dset_size = len(image_folder)
-            dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = 1024, shuffle=False, num_workers=1)
+            dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = 1024, shuffle=False, num_workers=num_workers)
 
             #load data within that folder
             for data, labels in tqdm(dset_loaders):
