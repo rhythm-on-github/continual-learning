@@ -37,13 +37,15 @@ def handle_inputs():
     args = parser.parse_args()
 
     #running arguments
-    args.iters = 10
+    args.iters = 100
     args.experiment = "TINMNIST"
-    args.screnario = "task"
-    args.lwf = True
-    #args.ewc = True
+    #args.scenario = "task"
     #args.batch = 256
-    args.cuda = False
+    args.cuda = True
+    
+    #args.lwf = True
+    #args.ewc = True
+    args.icarl = True
 
     set_method_options(args)                         # -if a method's "convenience"-option is chosen, select components
     set_default_values(args, also_hyper_params=True) # -set defaults, some are based on chosen scenario / experiment
@@ -92,6 +94,8 @@ def run(args, verbose=False):
         normalize=checkattr(args, "normalize"), verbose=verbose, exception=(args.seed==0),
         singlehead=checkattr(args, 'singlehead'), train_set_per_class=checkattr(args, 'gen_classifier')
     )
+    if args.experiment == 'TINMNIST':
+        args.contexts = len(train_datasets)
     # The experiments in this script follow the academic continual learning setting,
     # the above lines of code therefore load both the 'context set' and the 'data stream'
 

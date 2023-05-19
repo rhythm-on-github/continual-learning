@@ -387,9 +387,14 @@ def train_cl(model, train_datasets, iters=2000, batch_size=32, baseline='none',
             # reduce examplar-sets (only needed when '--use-full-capacity' is selected)
             model.reduce_memory_sets(samples_per_class)
             # for each new class trained on, construct examplar-set
-            new_classes = list(range(model.classes_per_context)) if (
-                    model.scenario=="domain" or per_context_singlehead
-            ) else list(range(model.classes_per_context*(context-1), model.classes_per_context*context))
+            new_classes = []
+            if data_root_end == 'TINMNIST':
+                TINMNIST_class_sums = [0, 50, 100, 150, 200, 202, 204, 206, 208, 210]
+                new_classes = list(range(TINMNIST_class_sums[context-1], TINMNIST_class_sums[context]))
+            else:
+                new_classes = list(range(model.classes_per_context)) if (
+                        model.scenario=="domain" or per_context_singlehead
+                ) else list(range(model.classes_per_context*(context-1), model.classes_per_context*context))
             for class_id in new_classes:
                 # create new dataset containing only all examples of this class
                 class_dataset = SubDataset(original_dataset=train_dataset, sub_labels=[class_id])

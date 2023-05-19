@@ -48,9 +48,9 @@ data_transforms_mnist = {
 }
 
 class TINMNIST(VisionDataset):
-    data = None
-    targets = None
-    classes = [i for i in range(50)]
+    data = []
+    targets = []
+    classes = []
     
     @property
     def train_labels(self):
@@ -101,37 +101,41 @@ class TINMNIST(VisionDataset):
 
         #download dataset maybe sometime
 
-        if self.data is None:
-            #load self.data and self.targets
-            self.data = np.zeros((180000, 3, 28, 28))
-            self.targets = np.zeros(180000)
-            i = 0
-            for task_num in range(1, 1+1):
-                print("\nLoading task " + str(task_num) + " of 9")
-                path_task = os.path.join(dataDir, "Task_" + str(task_num))
+        #load self.data and self.targets
+        self.data = np.zeros((180000, 3, 28, 28))
+        self.targets = np.zeros(180000)
+        i = 0
+        label_offset = -50
+        for task_num in range(1, 9+1):
+            print("\nLoading task " + str(task_num) + " of 9")
+            path_task = os.path.join(dataDir, "Task_" + str(task_num))
             
-                image_folder = None
-                if (task_num <= 4):
-                    image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_tin['train'])
+            image_folder = None
+            if (task_num <= 4):
+                image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_tin['train'])
+                label_offset += 50
+            else:
+                image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_mnist['train'])
+                if (task_num == 5):
+                    label_offset += 50
                 else:
-                    image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_mnist['train'])
+                    label_offset += 2
             
-                dset_size = len(image_folder)
-                dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = 1024, shuffle=False, num_workers=1)
+            dset_size = len(image_folder)
+            dset_loaders = torch.utils.data.DataLoader(image_folder, batch_size = 1024, shuffle=False, num_workers=1)
 
-                #load data within that folder
-                for data, labels in tqdm(dset_loaders):
-                    pre_i = i
-                    i += len(data)
-                    self.data[pre_i:i, :, :, :] = data
-                    self.targets[pre_i:i] = labels
+            #load data within that folder
+            for data, labels in tqdm(dset_loaders):
+                pre_i = i
+                i += len(data)
+                self.data[pre_i:i, :, :, :] = data
+                self.targets[pre_i:i] = torch.add(labels, label_offset)
 
-            print("\nResizing data structure")
-            self.data = np.resize(self.data, (i, 3, 28, 28))
-            self.targets = np.resize(self.targets, i)
-            print("TINMNIST loaded")
-        else:
-            print("TINMNIST already loaded, skipping")
+        print("\nResizing data structure")
+        self.data = np.resize(self.data, (i, 3, 28, 28))
+        self.targets = np.resize(self.targets, i)
+        print("TINMNIST loaded")
+        self.classes = [i for i in range(int(max(self.targets)+1))]
 
         
     def __len__(self) -> int:

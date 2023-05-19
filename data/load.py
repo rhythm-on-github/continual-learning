@@ -134,12 +134,27 @@ def get_context_set(name, scenario, contexts, data_dir="./datasets", only_config
         testset = get_dataset(data_type, type="test", dir=data_dir, target_transform=target_transform, verbose=verbose,
                               augment=augment, normalize=normalize)
         # generate labels-per-dataset (if requested, training data is split up per class rather than per context)
-        labels_per_dataset_train = [[label] for label in range(classes)] if train_set_per_class else [
-            list(np.array(range(classes_per_context))+classes_per_context*context_id) for context_id in range(contexts)
-        ]
-        labels_per_dataset_test = [
-            list(np.array(range(classes_per_context))+classes_per_context*context_id) for context_id in range(contexts)
-        ]
+        labels_per_dataset_train = []
+        labels_per_dataset_test = []
+        if name == 'TINMNIST':
+            n_labels = DATASET_CONFIGS['TINMNIST']['classes']
+            next_task_start_label = 0
+            for label in range(n_labels):
+                if label == next_task_start_label:
+                    labels_per_dataset_train.append([])
+                    if label <= 150:
+                        next_task_start_label += 50
+                    else:
+                        next_task_start_label += 2
+                labels_per_dataset_train[-1].append(label)
+            labels_per_dataset_test = labels_per_dataset_train
+        else:
+            labels_per_dataset_train = [[label] for label in range(classes)] if train_set_per_class else [
+                list(np.array(range(classes_per_context))+classes_per_context*context_id) for context_id in range(contexts)
+            ]
+            labels_per_dataset_test = [
+                list(np.array(range(classes_per_context))+classes_per_context*context_id) for context_id in range(contexts)
+            ]
         # split the train and test datasets up into sub-datasets
         train_datasets = []
         for labels in labels_per_dataset_train:
