@@ -37,16 +37,19 @@ def handle_inputs():
     args = parser.parse_args()
 
     #running arguments
-    args.iters = 500
+    args.iters = 2000
     args.experiment = "TINMNIST"
     #args.scenario = "task"
     #args.batch = 256
     args.cuda = True
     
-    #args.lwf = True
-    args.ewc = True
-    #args.icarl = True
+    #finetune?
     #args.joint = True
+    args.lwf = True
+    #args.ewc = True - Out of scope, would take ~5.5 days to run once
+    #args.icarl = True
+    #dgr?
+    #args.agem = true
 
     set_method_options(args)                         # -if a method's "convenience"-option is chosen, select components
     set_default_values(args, also_hyper_params=True) # -set defaults, some are based on chosen scenario / experiment
