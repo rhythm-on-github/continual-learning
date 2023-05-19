@@ -43,12 +43,12 @@ def handle_inputs():
     #args.batch = 256
     args.cuda = True
     
-    #finetune?
+    #No method argument means finetune?
     #args.joint = True
-    args.lwf = True
-    #args.ewc = True - Out of scope, would take ~5.5 days to run once
+    #args.lwf = True
+    #args.ewc = True - Very slow, at least with TINMNIST
     #args.icarl = True
-    #dgr?
+    #args.replay = 'generative'    #this is dgr
     #args.agem = True
 
     set_method_options(args)                         # -if a method's "convenience"-option is chosen, select components
