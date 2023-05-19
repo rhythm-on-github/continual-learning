@@ -37,16 +37,16 @@ def handle_inputs():
     args = parser.parse_args()
 
     #running arguments
-    args.iters = 100
+    args.iters = 500
     args.experiment = "TINMNIST"
     #args.scenario = "task"
     #args.batch = 256
     args.cuda = True
     
     #args.lwf = True
-    #args.ewc = True
+    args.ewc = True
     #args.icarl = True
-    args.joint = True
+    #args.joint = True
 
     set_method_options(args)                         # -if a method's "convenience"-option is chosen, select components
     set_default_values(args, also_hyper_params=True) # -set defaults, some are based on chosen scenario / experiment

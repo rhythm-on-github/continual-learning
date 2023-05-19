@@ -87,6 +87,7 @@ class TINMNIST(VisionDataset):
         super(TINMNIST, self).__init__(root, transform=transform,
                                     target_transform=target_transform)
         self.train = train  # training set or test set
+        mode = 'train' if train else 'test'
 
         #if self._check_legacy_exist():
         #    self.data, self.targets = self._load_legacy_data()
@@ -112,10 +113,10 @@ class TINMNIST(VisionDataset):
             
             image_folder = None
             if (task_num <= 4):
-                image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_tin['train'])
+                image_folder = datasets.ImageFolder(os.path.join(path_task, mode), transform = data_transforms_tin[mode])
                 label_offset += 50
             else:
-                image_folder = datasets.ImageFolder(os.path.join(path_task, 'test'), transform = data_transforms_mnist['train'])
+                image_folder = datasets.ImageFolder(os.path.join(path_task, mode), transform = data_transforms_mnist[mode])
                 if (task_num == 5):
                     label_offset += 50
                 else:
@@ -134,7 +135,7 @@ class TINMNIST(VisionDataset):
         print("\nResizing data structure")
         self.data = np.resize(self.data, (i, 3, 28, 28))
         self.targets = np.resize(self.targets, i)
-        print("TINMNIST loaded")
+        #print("TINMNIST loaded")
         self.classes = [i for i in range(int(max(self.targets)+1))]
 
         

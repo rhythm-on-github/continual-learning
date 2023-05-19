@@ -8,6 +8,8 @@ from utils import get_data_loader
 from models import fc
 from models.utils.ncl import additive_nearest_kf
 
+from tqdm import tqdm
+
 
 class ContinualLearner(nn.Module, metaclass=abc.ABCMeta):
     '''Abstract module to add continual learning capabilities to a classifier (e.g., param regularization, replay).'''
@@ -218,7 +220,8 @@ class ContinualLearner(nn.Module, metaclass=abc.ABCMeta):
                                       cuda=self._is_on_cuda())
 
         # Estimate the FI-matrix for [self.fisher_n] batches of size 1
-        for index,(x,y) in enumerate(data_loader):
+        print("Estimating FI-matrix")
+        for index,(x,y) in tqdm(enumerate(data_loader)):
             # break from for-loop if max number of samples has been reached
             if self.fisher_n is not None:
                 if index > self.fisher_n:
