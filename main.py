@@ -37,14 +37,14 @@ def handle_inputs():
     args = parser.parse_args()
 
     #running arguments
-    args.iters = 2000
+    args.iters = 10000
     args.experiment = "TINMNIST"
     #args.scenario = "task"
     #args.batch = 256
     args.cuda = True
     
     #No method argument means finetune?
-    #args.joint = True
+    args.joint = True
     #args.lwf = True
     #args.ewc = True - Very slow, at least with TINMNIST
     #args.icarl = True

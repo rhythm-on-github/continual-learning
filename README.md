@@ -1,3 +1,10 @@
+This is a modification (fork) of GMvandeVen/continual-learning.
+To run this with TINMNIST, first the dataset needs to be downloaded.
+To do this, first use the dataset downloading in FrederikStaer/P8-SilasTheFurryPig.
+Then, in the continual-learning repository folder, make a folder called "TINMNIST".
+lastly, copy the contents of P8-SilasTheFurryPig/Data/ to continual-learning/TINMNIST/
+
+Original readme below:
 # Continual Learning
 [![DOI](https://zenodo.org/badge/150479999.svg)](https://zenodo.org/badge/latestdoi/150479999)
 
